@@ -23,18 +23,15 @@ export async function fetchJSON<T>(url: string): Promise<T> {
 }
 
 export async function sendFile<T>(url: string, file: File): Promise<T> {
-  const result = await $.ajax({
-    async: false,
-    data: file,
-    dataType: "json",
-    headers: {
-      "Content-Type": "application/octet-stream",
-    },
+  const res = await fetch(url, {
     method: "POST",
-    processData: false,
-    url,
+    headers: { "Content-Type": "application/octet-stream" },
+    body: file,
   });
-  return result;
+  if (!res.ok) {
+    throw new Error(`sendFile failed: ${res.status}`);
+  }
+  return res.json() as Promise<T>;
 }
 
 export async function sendJSON<T>(url: string, data: object): Promise<T> {

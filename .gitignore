@@ -221,5 +221,8 @@ application/upload/**
 !application/upload/**/
 !application/upload/**/.gitkeep
 
+# Old GIF movies (replaced by WebM)
+application/public/movies/*.gif
+
 # Temp files
 temp/
