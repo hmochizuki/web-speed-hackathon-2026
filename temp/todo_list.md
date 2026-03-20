@@ -30,7 +30,7 @@
 
 - [x] 006-シード画像をAVIFに事前変換する
 - [x] 011-ユーザーアップロード画像をサーバー側でAVIF変換する
-- [ ] 005-FFmpeg WASMを遅延読み込みにする
+- [x] 005-FFmpeg WASMを遅延読み込みにする
 - [ ] 008-動画・音声ファイルを最適化する
 - [x] 020-momentをIntl.DateTimeFormatに置き換える
 - [ ] 021-重いライブラリを動的importにする(web-llm,katex,kuromoji等)
@@ -47,3 +47,4 @@
 - [ ] 010-CSSをクリティカルCSS分離する
 - [ ] 035-フォントのpreloadヘッダーを追加する
 - [ ] 036-タイムラインに仮想スクロールを導入する
+- [x] 037-FFmpeg・ImageMagick WASMをクライアントから完全除去する
