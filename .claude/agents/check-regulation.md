@@ -13,7 +13,7 @@ Web Speed Hackathon 2026 のレギュレーション (docs/regulation.md) に基
 
 ## チェック項目と手順
 
-以下の5項目を順にチェックし、最後にテーブル形式でレポートを出力する。
+以下の6項目を順にチェックし、最後にテーブル形式でレポートを出力する。
 
 ---
 
@@ -74,7 +74,43 @@ Web Speed Hackathon 2026 のレギュレーション (docs/regulation.md) に基
 
 ---
 
-### チェック5: VRT（Visual Regression Test）
+### チェック5: 手動テスト項目の機能保持
+
+**根拠:** docs/test_cases.md に記載された手動テスト項目の機能が維持されている必要がある（機能落ちは禁止）
+
+**手順:**
+1. Read ツールで `docs/test_cases.md` を読み取り、手動テスト項目を把握する
+2. 以下のE2Eでカバーされにくい重要機能について、コード上で機能が保持されているか静的に確認する:
+
+**a. 翻訳機能:**
+- Grep で `Show Translation` または `翻訳` をクライアントコード内で検索
+- 翻訳ボタンと翻訳表示のコンポーネントが存在することを確認
+
+**b. 投稿機能（メディア形式対応）:**
+- Grep で `tiff` / `TIFF` をサーバーまたはクライアントコード内で検索（TIFF画像投稿対応）
+- Grep で `wav` / `WAV` を検索（WAV音声投稿対応）
+- Grep で `mkv` / `MKV` / `matroska` を検索（MKV動画投稿対応）
+- Grep で `EXIF` / `exif` / `Image Description` を検索（EXIF ALT対応）
+- Grep で `Shift_JIS` / `shift-jis` / `sjis` を検索（Shift_JISメタデータ対応）
+
+**c. 動画の5秒切り抜き・正方形切り抜き:**
+- Grep で `5` と `crop` / `trim` / `duration` / `ss` をサーバーまたはクライアントの動画処理コード内で検索
+
+**d. DM機能（リアルタイム）:**
+- Grep で `WebSocket` / `ws` / `SSE` / `EventSource` をDM関連コード内で検索し、リアルタイム更新機能が存在することを確認
+
+**e. Crokサジェスト機能:**
+- Grep で `サジェスト` / `suggest` をクライアントコード内で検索
+
+**f. 検索のネガティブ判定:**
+- Grep で `ネガティブ` / `感情` / `極性` / `sentiment` をクライアントコード内で検索
+
+3. 各機能の関連コードが存在すれば **PASS**
+4. 関連コードが削除・欠落していれば **FAIL** — 欠落している機能を記載
+
+---
+
+### チェック6: VRT（Visual Regression Test）
 
 **根拠:** VRT を失敗させるデザイン変更は禁止されている
 
@@ -104,7 +140,8 @@ Web Speed Hackathon 2026 のレギュレーション (docs/regulation.md) に基
 | 2 | シードID 未変更                  | PASS/FAIL | ... |
 | 3 | SSEプロトコル 未変更             | PASS/FAIL | ... |
 | 4 | crok情報伝達方法 SSEのみ         | PASS/FAIL | ... |
-| 5 | VRT（Visual Regression Test）    | PASS/FAIL | ... |
+| 5 | 手動テスト項目の機能保持         | PASS/FAIL | ... |
+| 6 | VRT（Visual Regression Test）    | PASS/FAIL | ... |
 
 ### 総合判定: PASS/FAIL (N件の違反)
 ```
