@@ -23,9 +23,10 @@ subagent の結果をそのままユーザーに表示する。
 以下の手順で VRT を実行する:
 
 1. **ビルド**: `cd /Users/hi.mochizuki/zatta/web-speed-hackathon-2026/application && pnpm run build`
-2. **サーバー起動**: `cd /Users/hi.mochizuki/zatta/web-speed-hackathon-2026/application && pnpm run start` をバックグラウンドで実行
-3. **サーバー待機**: localhost:3000 が応答するまで待つ（最大60秒）
-4. **VRT 実行**: `cd /Users/hi.mochizuki/zatta/web-speed-hackathon-2026/application && pnpm run test`
-5. **サーバー停止**: バックグラウンドのサーバープロセスを停止
+2. **サーバー起動**: `cd /Users/hi.mochizuki/zatta/web-speed-hackathon-2026/application && PORT=3001 pnpm run start` をバックグラウンドで実行
+3. **サーバー待機**: localhost:3001 が応答するまで待つ（最大60秒）
+4. **DB初期化**: `curl -s -X POST http://localhost:3001/api/v1/initialize`（テストデータの残留によるスナップショット差分を防止）
+5. **VRT 実行**: `cd /Users/hi.mochizuki/zatta/web-speed-hackathon-2026/application && E2E_BASE_URL=http://localhost:3001 pnpm run test`
+6. **サーバー停止**: バックグラウンドのサーバープロセスを停止
 
 VRT の結果をユーザーに表示する。失敗したテストがあれば詳細を報告する。
