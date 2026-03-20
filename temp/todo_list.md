@@ -37,7 +37,7 @@
 - [ ] 022-SequelizeのdefaultScopeを最適化する
 - [ ] 023-devtoolのsource-mapを本番で無効化する
 - [ ] 031-imgタグにloading="lazy"を追加する
-- [ ] 032-Font Awesome SVGスプライトを使用アイコンのみに絞る
+- [x] 032-Font Awesome SVGスプライトを使用アイコンのみに絞る
 - [ ] 033-lodashをnamed import(lodash-es)に変更してtree shakingを有効化する
 - [ ] 034-create()後の冗長なfindByPk/reloadを除去する
 
