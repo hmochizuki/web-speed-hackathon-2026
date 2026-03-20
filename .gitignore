@@ -225,4 +225,4 @@ application/upload/**
 application/public/movies/*.gif
 
 # Temp files
-temp/
+temp/backup-jpg
