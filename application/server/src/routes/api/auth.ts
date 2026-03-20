@@ -8,10 +8,10 @@ export const authRouter = Router();
 
 authRouter.post("/signup", async (req, res) => {
   try {
-    const { id: userId } = await User.create(req.body);
-    const user = await User.findByPk(userId);
+    const user = await User.create(req.body);
+    await user.reload();
 
-    req.session.userId = userId;
+    req.session.userId = user.id;
     return res.status(200).type("application/json").send(user);
   } catch (err) {
     if (err instanceof UniqueConstraintError) {
