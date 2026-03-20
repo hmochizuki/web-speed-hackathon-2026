@@ -5,10 +5,11 @@ import { Modal } from "@web-speed-hackathon-2026/client/src/components/modal/Mod
 
 interface Props {
   alt: string;
+  priority?: boolean;
   src: string;
 }
 
-export const CoveredImage = ({ alt, src }: Props) => {
+export const CoveredImage = ({ alt, priority, src }: Props) => {
   const dialogId = useId();
   const handleDialogClick = useCallback((ev: MouseEvent<HTMLDialogElement>) => {
     ev.stopPropagation();
@@ -19,7 +20,8 @@ export const CoveredImage = ({ alt, src }: Props) => {
       <img
         alt={alt}
         className="absolute top-1/2 left-1/2 h-full w-full max-w-none -translate-x-1/2 -translate-y-1/2 object-cover"
-        loading="lazy"
+        fetchPriority={priority ? "high" : undefined}
+        loading={priority ? "eager" : "lazy"}
         src={src}
       />
 
