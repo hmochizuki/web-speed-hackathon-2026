@@ -1,4 +1,27 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(cd * && pnpm *)",
+      "Bash(cd * && ANALYZE=* pnpm *)",
+      "Bash(cd * && PORT=* pnpm *)",
+      "Bash(cd * && E2E_BASE_URL=* pnpm *)",
+      "Bash(PORT=* pnpm *)",
+      "Bash(E2E_BASE_URL=* pnpm *)",
+      "Bash(ANALYZE=* pnpm *)",
+      "Bash(curl *)",
+      "Bash(lsof *)",
+      "Bash(kill *)",
+      "Bash(ffmpeg *)",
+      "Bash(du *)",
+      "Bash(sqlite3 *)",
+      "Skill(implement-task)",
+      "Skill(check-regulation)",
+      "Skill(check-bundle-size)",
+      "Skill(code-review:code-review)",
+      "Skill(update-config)",
+      "Read(*/web-speed-hackathon-2026/*)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
