@@ -18,16 +18,30 @@ directMessageRouter.get("/dm", async (req, res) => {
 
   const userId = req.session.userId;
 
-  const conversations = await DirectMessageConversation.findAll({
+  const conversations = await DirectMessageConversation.unscoped().findAll({
     where: {
       [Op.or]: [{ initiatorId: userId }, { memberId: userId }],
     },
+    attributes: ["id", "initiatorId", "memberId"],
+    include: [
+      {
+        association: "initiator",
+        attributes: ["id", "name", "username"],
+        include: [{ association: "profileImage", attributes: ["id", "alt"] }],
+      },
+      {
+        association: "member",
+        attributes: ["id", "name", "username"],
+        include: [{ association: "profileImage", attributes: ["id", "alt"] }],
+      },
+    ],
   });
 
   const results = await Promise.all(
     conversations.map(async (c) => {
-      const lastMessage = await DirectMessage.findOne({
+      const lastMessage = await DirectMessage.unscoped().findOne({
         where: { conversationId: c.id },
+        attributes: ["body", "createdAt"],
         order: [["createdAt", "DESC"]],
         limit: 1,
       });
@@ -36,16 +50,18 @@ directMessageRouter.get("/dm", async (req, res) => {
         return null;
       }
 
+      const peer = c.initiatorId !== userId ? c.initiator : c.member;
       const peerId = c.initiatorId !== userId ? c.initiatorId : c.memberId;
-      const unreadCount = await DirectMessage.count({
-        where: { conversationId: c.id, senderId: peerId, isRead: false },
-      });
+      const hasUnread =
+        (await DirectMessage.unscoped().count({
+          where: { conversationId: c.id, senderId: peerId, isRead: false },
+        })) > 0;
 
       return {
-        ...c.toJSON(),
+        id: c.id,
+        peer: peer?.toJSON(),
         lastMessage: lastMessage.toJSON(),
-        hasUnread: unreadCount > 0,
-        messages: [lastMessage.toJSON()],
+        hasUnread,
       };
     }),
   );

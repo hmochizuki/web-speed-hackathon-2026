@@ -65,6 +65,13 @@ declare namespace Models {
     hasUnread?: boolean;
   }
 
+  interface DirectMessageConversationSummary {
+    id: string;
+    peer: Models.User;
+    lastMessage: { body: string; createdAt: string };
+    hasUnread: boolean;
+  }
+
   interface ChatMessage {
     role: "user" | "assistant";
     content: string;
