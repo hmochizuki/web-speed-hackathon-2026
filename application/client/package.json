@@ -2,10 +2,11 @@
   "name": "@web-speed-hackathon-2026/client",
   "version": "0.0.1",
   "private": true,
+  "sideEffects": ["*.css"],
   "license": "MPL-2.0",
   "author": "CyberAgent, Inc.",
   "scripts": {
-    "build": "NODE_ENV=development webpack",
+    "build": "NODE_ENV=production webpack",
     "typecheck": "tsc"
   },
   "dependencies": {
