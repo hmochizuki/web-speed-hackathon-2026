@@ -1,6 +1,6 @@
 import { Router } from "express";
 import httpErrors from "http-errors";
-import { col, where, Op } from "sequelize";
+import { Op } from "sequelize";
 
 import { eventhub } from "@web-speed-hackathon-2026/server/src/eventhub";
 import {
@@ -16,20 +16,46 @@ directMessageRouter.get("/dm", async (req, res) => {
     throw new httpErrors.Unauthorized();
   }
 
+  const userId = req.session.userId;
+
   const conversations = await DirectMessageConversation.findAll({
     where: {
-      [Op.and]: [
-        { [Op.or]: [{ initiatorId: req.session.userId }, { memberId: req.session.userId }] },
-        where(col("messages.id"), { [Op.not]: null }),
-      ],
+      [Op.or]: [{ initiatorId: userId }, { memberId: userId }],
     },
-    order: [[col("messages.createdAt"), "DESC"]],
   });
 
-  const sorted = conversations.map((c) => ({
-    ...c.toJSON(),
-    messages: c.messages?.reverse(),
-  }));
+  const results = await Promise.all(
+    conversations.map(async (c) => {
+      const lastMessage = await DirectMessage.findOne({
+        where: { conversationId: c.id },
+        order: [["createdAt", "DESC"]],
+        limit: 1,
+      });
+
+      if (lastMessage == null) {
+        return null;
+      }
+
+      const peerId = c.initiatorId !== userId ? c.initiatorId : c.memberId;
+      const unreadCount = await DirectMessage.count({
+        where: { conversationId: c.id, senderId: peerId, isRead: false },
+      });
+
+      return {
+        ...c.toJSON(),
+        lastMessage: lastMessage.toJSON(),
+        hasUnread: unreadCount > 0,
+        messages: [lastMessage.toJSON()],
+      };
+    }),
+  );
+
+  const sorted = results
+    .filter((r): r is NonNullable<typeof r> => r != null)
+    .sort(
+      (a, b) =>
+        new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime(),
+    );
 
   return res.status(200).type("application/json").send(sorted);
 });
@@ -56,7 +82,16 @@ directMessageRouter.post("/dm", async (req, res) => {
       memberId: peer.id,
     },
   });
-  await conversation.reload();
+  await conversation.reload({
+    include: [
+      {
+        association: "messages",
+        include: [{ association: "sender", include: [{ association: "profileImage" }] }],
+        order: [["createdAt", "ASC"]],
+        required: false,
+      },
+    ],
+  });
 
   return res.status(200).type("application/json").send(conversation);
 });
@@ -105,6 +140,14 @@ directMessageRouter.get("/dm/:conversationId", async (req, res) => {
       id: req.params.conversationId,
       [Op.or]: [{ initiatorId: req.session.userId }, { memberId: req.session.userId }],
     },
+    include: [
+      {
+        association: "messages",
+        include: [{ association: "sender", include: [{ association: "profileImage" }] }],
+        order: [["createdAt", "ASC"]],
+        required: false,
+      },
+    ],
   });
   if (conversation === null) {
     throw new httpErrors.NotFound();
