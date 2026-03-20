@@ -6,7 +6,7 @@
 - [ ] 013-postsAPIをサーバーサイドページネーションにする
 - [x] 014-Tailwind CSSをビルド時処理に変更する
 - [x] 015-window.loadイベント待ちを即時レンダリングに変更する
-- [ ] 004-jQueryをfetch APIに置き換える
+- [x] 004-jQueryをfetch APIに置き換える
 - [x] 024-foundation/LinkをReact RouterのLinkに変更してSPAナビゲーションにする
 - [x] 025-AspectRatioBoxのsetTimeout(500ms)をCSS aspect-ratioに置き換える
 - [x] 026-DBの外部キーカラムにインデックスを追加する
