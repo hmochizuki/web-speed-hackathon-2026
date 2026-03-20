@@ -20,7 +20,26 @@
       "Skill(code-review:code-review)",
       "Skill(update-config)",
       "Read(*/web-speed-hackathon-2026/*)",
-      "Bash(cp */temp/backup-jpg/e2e-initial-commit-snapshots/* *)"
+      "Bash(cp */temp/backup-jpg/e2e-initial-commit-snapshots/* *)",
+      "Bash(gh issue comment *)",
+      "Bash(gh api *)",
+      "Bash(gh pr *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git status *)",
+      "Bash(git status)",
+      "Bash(git branch *)",
+      "Bash(git show *)",
+      "Bash(git stash *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git worktree *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)",
+      "Bash(wc *)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Skill(run-scoring)"
     ]
   },
   "hooks": {
