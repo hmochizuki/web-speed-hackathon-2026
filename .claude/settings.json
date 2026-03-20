@@ -19,7 +19,8 @@
       "Skill(check-bundle-size)",
       "Skill(code-review:code-review)",
       "Skill(update-config)",
-      "Read(*/web-speed-hackathon-2026/*)"
+      "Read(*/web-speed-hackathon-2026/*)",
+      "Bash(cp */temp/backup-jpg/e2e-initial-commit-snapshots/* *)"
     ]
   },
   "hooks": {

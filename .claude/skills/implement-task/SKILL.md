@@ -147,6 +147,15 @@ Agent ツールで `check-regulation` subagent を起動する:
 
 FAIL があれば修正してから次に進む。
 
+### スナップショット正解データ
+
+VRTの正解スナップショット（初期コミット時）は本プロジェクトの以下に保存されている:
+`/Users/hi.mochizuki/zatta/web-speed-hackathon-2026/temp/backup-jpg/e2e-initial-commit-snapshots/`
+
+- gitignore対象のため worktree にはコピーされない
+- VRT失敗時の差分確認・復旧にはこの絶対パスで参照すること
+- **スナップショットの更新（test:update, --update-snapshots）は絶対禁止**
+
 ### 4-2. E2E/VRT 実行
 
 以下の手順でテストを実行する。
