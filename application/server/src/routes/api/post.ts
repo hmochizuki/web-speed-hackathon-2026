@@ -1,7 +1,7 @@
 import { Router } from "express";
 import httpErrors from "http-errors";
 
-import { Comment, Post } from "@web-speed-hackathon-2026/server/src/models";
+import { Comment, Post, PostsImagesRelation } from "@web-speed-hackathon-2026/server/src/models";
 
 export const postRouter = Router();
 
@@ -41,22 +41,28 @@ postRouter.post("/posts", async (req, res) => {
     throw new httpErrors.Unauthorized();
   }
 
+  const { images: imageIds, ...rest } = req.body;
+
   const post = await Post.create(
     {
-      ...req.body,
+      ...rest,
       userId: req.session.userId,
     },
     {
       include: [
-        {
-          association: "images",
-          through: { attributes: [] },
-        },
         { association: "movie" },
         { association: "sound" },
       ],
     },
   );
 
-  return res.status(200).type("application/json").send(post);
+  if (Array.isArray(imageIds) && imageIds.length > 0) {
+    await PostsImagesRelation.bulkCreate(
+      imageIds.map((img: { id: string }) => ({ postId: post.id, imageId: img.id })),
+    );
+  }
+
+  const result = await Post.findByPk(post.id);
+
+  return res.status(200).type("application/json").send(result);
 });
