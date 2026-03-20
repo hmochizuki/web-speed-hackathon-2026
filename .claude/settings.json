@@ -1,5 +1,16 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // \"\"' | grep -q 'git commit' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"コミット前にレギュレーション違反チェック（静的チェックのみ）を実行してください。Agent ツールで check-regulation subagent を起動し、チェック1〜5（fly.toml、シードID、SSEプロトコル、crok情報伝達、手動テスト項目の機能保持）の結果を確認してからコミットしてください。VRT（チェック6）はスキップしてください。違反がある場合はコミットを中止し、修正を提案してください。\"}}' || true"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Bash",
