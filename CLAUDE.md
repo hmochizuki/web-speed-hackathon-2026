@@ -98,6 +98,13 @@ FCP×10 + SI×10 + LCP×25 + TBT×30 + CLS×25
 TBT×25 + INP×25
 ※ページ表示で300点以上の場合のみ採点
 
+## タスク管理
+
+改善タスクは `temp/todo_list.md` で管理する。
+
+- タスクIDは `001-xxxをyyyする` の形式
+- 各タスクの詳細は `temp/001-xxxをyyyする.md` に記載
+
 ## ツールチェーン
 - Node.js 24.14.0 / pnpm 10.32.1（mise で管理）
 - oxlint + oxfmt（リント・フォーマット）
