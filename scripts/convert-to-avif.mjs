@@ -2,25 +2,24 @@ import { readdir } from "node:fs/promises";
 import { join, basename, extname } from "node:path";
 import sharp from "sharp";
 
-const QUALITY = 50;
-const dirs = [
-  "../application/public/images",
-  "../application/public/images/profiles",
+const configs = [
+  { dir: "../application/public/images", quality: 50 },
+  { dir: "../application/public/images/profiles", quality: 90 },
 ];
 
-for (const dir of dirs) {
+for (const { dir, quality } of configs) {
   const fullDir = new URL(dir, import.meta.url).pathname;
   const files = await readdir(fullDir);
   const jpgs = files.filter((f) => extname(f) === ".jpg");
 
-  console.log(`\n${dir}: ${jpgs.length} files`);
+  console.log(`\n${dir} (quality: ${quality}): ${jpgs.length} files`);
 
   for (const file of jpgs) {
     const inputPath = join(fullDir, file);
     const outputPath = join(fullDir, basename(file, ".jpg") + ".avif");
 
     const result = await sharp(inputPath)
-      .avif({ quality: QUALITY })
+      .avif({ quality })
       .toFile(outputPath);
 
     const inputStat = await sharp(inputPath).metadata();
