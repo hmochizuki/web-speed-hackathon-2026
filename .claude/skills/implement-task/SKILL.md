@@ -149,11 +149,13 @@ FAIL があれば修正してから次に進む。
 
 ### 4-2. E2E/VRT 実行
 
-以下の手順でテストを実行する:
+以下の手順でテストを実行する。
 
-1. 既にポート3001で起動中のサーバーがあれば停止:
+**ポート番号の決定**: タスクIDの数値部分をポート番号に使う。例: タスクID `005` → ポート `3005`、タスクID `013` → ポート `3013`。以降 `$PORT` はこの値を指す。
+
+1. 既に対象ポートで起動中のサーバーがあれば停止:
    ```bash
-   lsof -i :3001 -t | xargs kill 2>/dev/null || true
+   lsof -i :$PORT -t | xargs kill 2>/dev/null || true
    ```
 
 2. ビルド（ステップ3-3で成功していればスキップ）:
@@ -163,27 +165,27 @@ FAIL があれば修正してから次に進む。
 
 3. サーバーをバックグラウンドで起動:
    ```bash
-   cd /Users/hi.mochizuki/zatta/web-speed-hackathon-2026/application && PORT=3001 pnpm run start
+   cd /Users/hi.mochizuki/zatta/web-speed-hackathon-2026/application && PORT=$PORT pnpm run start
    ```
    （run_in_background: true）
 
 4. サーバー起動待機:
-   `curl -s -o /dev/null -w '%{http_code}' http://localhost:3001/` で 200 が返るまでリトライ（最大60秒）
+   `curl -s -o /dev/null -w '%{http_code}' http://localhost:$PORT/` で 200 が返るまでリトライ（最大60秒）
 
 5. DB 初期化:
    ```bash
-   curl -s -X POST http://localhost:3001/api/v1/initialize
+   curl -s -X POST http://localhost:$PORT/api/v1/initialize
    ```
 
 6. テスト実行:
    ```bash
-   cd /Users/hi.mochizuki/zatta/web-speed-hackathon-2026/application && E2E_BASE_URL=http://localhost:3001 pnpm run test
+   cd /Users/hi.mochizuki/zatta/web-speed-hackathon-2026/application && E2E_BASE_URL=http://localhost:$PORT pnpm run test
    ```
    （timeout: 300000）
 
 7. サーバー停止:
    ```bash
-   lsof -i :3001 -t | xargs kill 2>/dev/null || true
+   lsof -i :$PORT -t | xargs kill 2>/dev/null || true
    ```
 
 ### 4-3. 手動テスト項目のコード確認
