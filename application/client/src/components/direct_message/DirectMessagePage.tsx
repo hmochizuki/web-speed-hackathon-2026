@@ -72,21 +72,22 @@ export const DirectMessagePage = ({
     [onSubmit, text],
   );
 
+  const messageListRef = useRef<HTMLUListElement>(null);
+
   useEffect(() => {
     const scrollToBottom = () => {
       window.scrollTo(0, document.body.scrollHeight);
     };
     scrollToBottom();
 
-    const observer = new MutationObserver(scrollToBottom);
-    observer.observe(document.body, { childList: true, subtree: true });
+    const listEl = messageListRef.current;
+    if (listEl == null) return;
 
-    const resizeObserver = new ResizeObserver(scrollToBottom);
-    resizeObserver.observe(document.body);
+    const observer = new MutationObserver(scrollToBottom);
+    observer.observe(listEl, { childList: true });
 
     return () => {
       observer.disconnect();
-      resizeObserver.disconnect();
     };
   }, []);
 
@@ -123,7 +124,7 @@ export const DirectMessagePage = ({
           </p>
         )}
 
-        <ul className="grid gap-3" data-testid="dm-message-list">
+        <ul className="grid gap-3" data-testid="dm-message-list" ref={messageListRef}>
           {conversation.messages.map((message) => {
             const isActiveUserSend = message.sender.id === activeUser.id;
 

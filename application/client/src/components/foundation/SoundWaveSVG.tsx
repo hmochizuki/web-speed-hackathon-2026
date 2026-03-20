@@ -5,6 +5,12 @@ interface ParsedData {
   peaks: number[];
 }
 
+function yieldToMain(): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
+}
+
 async function calculate(data: ArrayBuffer): Promise<ParsedData> {
   const audioCtx = new AudioContext();
 
@@ -23,6 +29,10 @@ async function calculate(data: ArrayBuffer): Promise<ParsedData> {
       sum += (Math.abs(leftData[j]!) + Math.abs(rightData[j]!)) / 2;
     }
     peaks.push(sum / (end - i));
+
+    if (peaks.length % 20 === 0) {
+      await yieldToMain();
+    }
   }
 
   let max = 0;
