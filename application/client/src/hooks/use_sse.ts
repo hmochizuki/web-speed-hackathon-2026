@@ -19,12 +19,19 @@ export function useSSE<T>(options: SSEOptions<T>): ReturnValues {
   const [isStreaming, setIsStreaming] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
   const contentRef = useRef("");
+  const rafIdRef = useRef<number>(0);
+  const pendingUpdateRef = useRef(false);
 
   const stop = useCallback(() => {
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
       eventSourceRef.current = null;
     }
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = 0;
+    }
+    pendingUpdateRef.current = false;
     setIsStreaming(false);
   }, []);
 
@@ -33,6 +40,15 @@ export function useSSE<T>(options: SSEOptions<T>): ReturnValues {
     setContent("");
     contentRef.current = "";
   }, [stop]);
+
+  const scheduleUpdate = useCallback(() => {
+    if (pendingUpdateRef.current) return;
+    pendingUpdateRef.current = true;
+    rafIdRef.current = requestAnimationFrame(() => {
+      pendingUpdateRef.current = false;
+      setContent(contentRef.current);
+    });
+  }, []);
 
   const start = useCallback(
     (url: string) => {
@@ -49,6 +65,12 @@ export function useSSE<T>(options: SSEOptions<T>): ReturnValues {
 
         const isDone = options.onDone?.(data) ?? false;
         if (isDone) {
+          if (rafIdRef.current) {
+            cancelAnimationFrame(rafIdRef.current);
+            rafIdRef.current = 0;
+          }
+          pendingUpdateRef.current = false;
+          setContent(contentRef.current);
           options.onComplete?.(contentRef.current);
           stop();
           return;
@@ -56,7 +78,7 @@ export function useSSE<T>(options: SSEOptions<T>): ReturnValues {
 
         const newContent = options.onMessage(data, contentRef.current);
         contentRef.current = newContent;
-        setContent(newContent);
+        scheduleUpdate();
       };
 
       eventSource.onerror = (error) => {
@@ -64,7 +86,7 @@ export function useSSE<T>(options: SSEOptions<T>): ReturnValues {
         stop();
       };
     },
-    [options, stop],
+    [options, stop, scheduleUpdate],
   );
 
   return { content, isStreaming, start, stop, reset };
