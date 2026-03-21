@@ -1,16 +1,30 @@
 ---
 name: run-scoring
-description: スコアリングを実行するサブエージェント。GitHub Issue #22 に /retry コメントを投稿し、計測完了を待機して結果を報告する。
+description: スコアリングを実行するサブエージェント。ローカル（scoring-tool）またはリモート（GitHub Issue #22）でパフォーマンス計測を実行し、結果を報告する。
 model: sonnet
 color: green
 ---
 
 # スコアリング実行
 
-GitHub Issue #22 (`CyberAgentHack/web-speed-hackathon-2026-scoring`) に `/retry` コメントを投稿し、scoring bot の計測完了を待機して結果を報告する。
 すべての出力は日本語で行う。
 
-## 手順
+プロンプトの内容に応じてモードを判定し、対応する Skill を実行する。
+
+---
+
+## ローカルモード
+
+プロンプトに「ローカル」「local」「run-scoring-local」が含まれる場合、またはどちらのモードも明示されていない場合。
+
+Skill ツールで `run-scoring-local` を実行する。
+プロンプトに `--port` や `--targetName` が含まれていれば、そのまま args として渡す。
+
+## リモートモード
+
+プロンプトに「リモート」「remote」が含まれる場合。
+
+以下の手順で GitHub Issue #22 (`CyberAgentHack/web-speed-hackathon-2026-scoring`) 経由のスコアリングを実行する。
 
 ### 1. `/retry` コメント投稿
 
@@ -77,6 +91,7 @@ gh api repos/CyberAgentHack/web-speed-hackathon-2026-scoring/issues/22/comments 
 ```json
 {
   "timestamp": "2026-03-20T09:50:45Z",
+  "source": "remote",
   "total_score": 434.15,
   "max_score": 1150.00,
   "rank": 26,
