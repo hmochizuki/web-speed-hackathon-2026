@@ -17,6 +17,29 @@ function loadSsgHtml(filename: string): string | null {
   return fs.existsSync(filePath) ? fs.readFileSync(filePath, "utf-8") : null;
 }
 
+function buildPreloadLinkHeader(): string {
+  const links: string[] = [];
+  const stylesDir = path.join(CLIENT_DIST_PATH, "styles");
+  if (fs.existsSync(stylesDir)) {
+    for (const file of fs.readdirSync(stylesDir)) {
+      if (file.endsWith(".css")) {
+        links.push(`</styles/${file}>; rel=preload; as=style`);
+      }
+    }
+  }
+  const scriptsDir = path.join(CLIENT_DIST_PATH, "scripts");
+  if (fs.existsSync(scriptsDir)) {
+    for (const file of fs.readdirSync(scriptsDir)) {
+      if (file.startsWith("main-") && file.endsWith(".js")) {
+        links.push(`</scripts/${file}>; rel=preload; as=script`);
+      }
+    }
+  }
+  return links.join(", ");
+}
+
+const preloadLinkHeader = buildPreloadLinkHeader();
+
 const ssgPages: Record<string, string | null> = {
   "/terms": loadSsgHtml("terms.html"),
   "/": loadSsgHtml("home.html"),
@@ -29,6 +52,9 @@ for (const [routePath, html] of Object.entries(ssgPages)) {
     staticRouter.get(routePath, (_req, res) => {
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       res.setHeader("Cache-Control", "no-cache");
+      if (preloadLinkHeader) {
+        res.setHeader("Link", preloadLinkHeader);
+      }
       res.send(html);
     });
   }
@@ -53,6 +79,9 @@ staticRouter.get("/posts/:postId", async (req, res, next) => {
       if (user?.profileImage) {
         linkValues.push(`</images/profiles/${user.profileImage.id}.avif>; rel=preload; as=image`);
       }
+      if (preloadLinkHeader) {
+        linkValues.push(preloadLinkHeader);
+      }
       if (linkValues.length > 0) {
         res.setHeader("Link", linkValues.join(", "));
       }
@@ -65,6 +94,15 @@ staticRouter.get("/posts/:postId", async (req, res, next) => {
 
 // SPA 対応のため、ファイルが存在しないときに index.html を返す
 staticRouter.use(history());
+
+if (preloadLinkHeader) {
+  staticRouter.use((_req, res, next) => {
+    if (!res.getHeader("Link")) {
+      res.setHeader("Link", preloadLinkHeader);
+    }
+    next();
+  });
+}
 
 staticRouter.use(
   serveStatic(UPLOAD_PATH, {

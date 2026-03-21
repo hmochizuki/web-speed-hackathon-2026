@@ -93,11 +93,20 @@ export const DirectMessageContainer = ({ activeUser, authModalId }: Props) => {
 
   useWs(`/api/v1/dm/${conversationId}`, (event: DmUpdateEvent | DmTypingEvent) => {
     if (event.type === "dm:conversation:message") {
+      setConversation((prev) => {
+        if (prev == null) return prev;
+        const idx = prev.messages.findIndex((m) => m.id === event.payload.id);
+        if (idx >= 0) {
+          const updated = [...prev.messages];
+          updated[idx] = event.payload;
+          return { ...prev, messages: updated };
+        }
+        if (event.payload.sender.id === activeUser?.id) {
+          return prev;
+        }
+        return { ...prev, messages: [...prev.messages, event.payload] };
+      });
       if (event.payload.sender.id !== activeUser?.id) {
-        setConversation((prev) => {
-          if (prev == null) return prev;
-          return { ...prev, messages: [...prev.messages, event.payload] };
-        });
         setIsPeerTyping(false);
         if (peerTypingTimeoutRef.current !== null) {
           clearTimeout(peerTypingTimeoutRef.current);

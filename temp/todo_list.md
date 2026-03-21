@@ -18,6 +18,8 @@
 - [x] 051-DM送信フローのTBTを改善する（DM送信TBT+20-25点、楽観的更新+key属性追加+typing debounce）
 - [x] 052-Crok AIチャットフローのTBTを改善する（Crok TBT+20-25点、Markdown key削除+SSEバッチ化+useHasContentBelow最適化+サジェストdebounce）
 - [x] 049-DM詳細ページのLCP/SI改善する（DM詳細+10-15点、スケルトンUI表示）
+- [x] 053-DM詳細scrollToのforced reflow解消+WS差分更新でTBTを改善する（DM詳細TBT+15-25点）
+- [x] 054-利用規約フォントをサブセット化する（7.3MB→52KB、利用規約SI+5-10点）+TermContainer lazy化
 - [ ] 050-ホームページのCLSを改善する（ホームCLS+5-7点、スケルトンプレースホルダー）
 
 ## 優先度: 中（追加改善）
