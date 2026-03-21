@@ -7,14 +7,14 @@
 @font-face {
   font-family: "Rei no Are Mincho";
   font-display: swap;
-  src: url(/fonts/ReiNoAreMincho-Regular.woff2) format("woff2");
+  src: url(/fonts/ReiNoAreMincho-Regular-subset.woff2) format("woff2");
   font-weight: normal;
 }
 
 @font-face {
   font-family: "Rei no Are Mincho";
   font-display: swap;
-  src: url(/fonts/ReiNoAreMincho-Heavy.woff2) format("woff2");
+  src: url(/fonts/ReiNoAreMincho-Heavy-subset.woff2) format("woff2");
   font-weight: bold;
 }
 

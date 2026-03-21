@@ -73,11 +73,10 @@ export const DirectMessagePage = ({
   );
 
   const messageListRef = useRef<HTMLUListElement>(null);
+  const messageEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    requestAnimationFrame(() => {
-      window.scrollTo(0, document.body.scrollHeight);
-    });
+    messageEndRef.current?.scrollIntoView();
   }, [conversation.messages.length]);
 
   if (conversationError != null) {
@@ -147,6 +146,7 @@ export const DirectMessagePage = ({
             );
           })}
         </ul>
+        <div ref={messageEndRef} />
       </div>
 
       <div className="sticky bottom-12 z-10 lg:bottom-0">

@@ -17,7 +17,7 @@
 - [x] 046-写真投稿ページのLCPをpreloadで改善する（写真投稿LCP+10-20点、サーバー側Link preload）
 - [x] 051-DM送信フローのTBTを改善する（DM送信TBT+20-25点、楽観的更新+key属性追加+typing debounce）
 - [x] 052-Crok AIチャットフローのTBTを改善する（Crok TBT+20-25点、Markdown key削除+SSEバッチ化+useHasContentBelow最適化+サジェストdebounce）
-- [ ] 049-DM詳細ページのLCP/SI改善する（DM詳細+10-15点、初期データプリロード）
+- [x] 049-DM詳細ページのLCP/SI改善する（DM詳細+10-15点、スケルトンUI表示）
 - [ ] 050-ホームページのCLSを改善する（ホームCLS+5-7点、スケルトンプレースホルダー）
 
 ## 優先度: 中（追加改善）

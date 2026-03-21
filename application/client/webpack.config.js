@@ -77,9 +77,13 @@ const config = {
       COMMIT_HASH: process.env.SOURCE_VERSION || "",
       NODE_ENV: isDev ? "development" : "production",
     }),
-    ...(isDev ? [] : [new MiniCssExtractPlugin({
-      filename: "styles/[name]-[contenthash].css",
-    })]),
+    ...(isDev
+      ? []
+      : [
+          new MiniCssExtractPlugin({
+            filename: "styles/[name]-[contenthash].css",
+          }),
+        ]),
     new CopyWebpackPlugin({
       patterns: [
         {

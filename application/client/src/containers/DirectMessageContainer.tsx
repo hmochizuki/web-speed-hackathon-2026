@@ -104,7 +104,9 @@ export const DirectMessageContainer = ({ activeUser, authModalId }: Props) => {
         }
         peerTypingTimeoutRef.current = null;
       }
-      void sendRead();
+      requestIdleCallback(() => {
+        void sendRead();
+      });
     } else if (event.type === "dm:conversation:typing") {
       setIsPeerTyping(true);
       if (peerTypingTimeoutRef.current !== null) {

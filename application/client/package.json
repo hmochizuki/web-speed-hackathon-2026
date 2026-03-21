@@ -71,6 +71,7 @@
     "postcss-preset-env": "10.4.0",
     "react-markdown": "10.1.0",
     "style-loader": "4.0.0",
+    "subset-font": "2.4.0",
     "tailwindcss": "^4.2.2",
     "tsx": "4.20.6",
     "typescript": "5.9.3",
