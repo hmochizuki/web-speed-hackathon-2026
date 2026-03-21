@@ -1,14 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
-import readline from "node:readline";
 import { fileURLToPath } from "node:url";
 
 import React from "react";
 import { renderToString } from "react-dom/server";
-import { Provider } from "react-redux";
 import { StaticRouter } from "react-router";
-import { combineReducers, legacy_createStore as createStore } from "redux";
-import { reducer as formReducer } from "redux-form";
 
 import { AppContainer } from "@web-speed-hackathon-2026/client/src/containers/AppContainer";
 
@@ -141,15 +137,10 @@ function renderPage(urlPath: string, initialData?: SsgPage["initialData"]): stri
     (globalThis as Record<string, unknown>).__SSG_INITIAL_DATA__ = initialData;
   }
 
-  const rootReducer = combineReducers({ form: formReducer });
-  const store = createStore(rootReducer);
-
   const html = renderToString(
-    <Provider store={store}>
-      <StaticRouter location={urlPath}>
-        <AppContainer />
-      </StaticRouter>
-    </Provider>,
+    <StaticRouter location={urlPath}>
+      <AppContainer />
+    </StaticRouter>,
   );
 
   (globalThis as Record<string, unknown>).__SSG_INITIAL_DATA__ = undefined;

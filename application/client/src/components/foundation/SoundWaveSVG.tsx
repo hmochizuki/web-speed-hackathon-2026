@@ -29,10 +29,7 @@ async function calculate(data: ArrayBuffer): Promise<ParsedData> {
       sum += (Math.abs(leftData[j]!) + Math.abs(rightData[j]!)) / 2;
     }
     peaks.push(sum / (end - i));
-
-    if (peaks.length % 20 === 0) {
-      await yieldToMain();
-    }
+    await yieldToMain();
   }
 
   let max = 0;
@@ -40,6 +37,7 @@ async function calculate(data: ArrayBuffer): Promise<ParsedData> {
     if (p > max) max = p;
   }
 
+  await audioCtx.close();
   return { max, peaks };
 }
 

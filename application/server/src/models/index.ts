@@ -165,6 +165,33 @@ export function initModels(sequelize: Sequelize) {
       name: "userId",
     },
   });
+
+  Post.addScope(
+    "defaultScope",
+    {
+      attributes: {
+        exclude: ["userId", "movieId", "soundId"],
+      },
+      include: [
+        {
+          association: "user",
+          attributes: { exclude: ["profileImageId"] },
+          include: [{ association: "profileImage" }],
+        },
+        {
+          association: "images",
+          through: { attributes: [] },
+        },
+        { association: "movie" },
+        { association: "sound" },
+      ],
+      order: [
+        ["id", "DESC"],
+        [{ model: Image, as: "images" }, "createdAt", "ASC"],
+      ],
+    },
+    { override: true },
+  );
 }
 
 export {

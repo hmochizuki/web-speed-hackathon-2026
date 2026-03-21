@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const LIMIT = 10;
+const DEFAULT_LIMIT = 10;
 
 function buildPagedUrl(apiPath: string, limit: number, offset: number): string {
   const separator = apiPath.includes("?") ? "&" : "?";
@@ -42,12 +42,14 @@ function consumeInitialData<T>(apiPath: string): T[] | null {
 export function useInfiniteFetch<T>(
   apiPath: string,
   fetcher: (apiPath: string) => Promise<T[]>,
+  options?: { limit?: number },
 ): ReturnValues<T> {
+  const limit = options?.limit ?? DEFAULT_LIMIT;
   const initialData = useRef(consumeInitialData<T>(apiPath));
   const internalRef = useRef({
     isLoading: false,
     offset: initialData.current !== null ? initialData.current.length : 0,
-    hasMore: initialData.current !== null ? initialData.current.length >= LIMIT : true,
+    hasMore: initialData.current !== null ? initialData.current.length >= limit : true,
   });
 
   const [result, setResult] = useState<Omit<ReturnValues<T>, "fetchMore">>({
@@ -72,7 +74,7 @@ export function useInfiniteFetch<T>(
       hasMore,
     };
 
-    const pagedUrl = buildPagedUrl(apiPath, LIMIT, offset);
+    const pagedUrl = buildPagedUrl(apiPath, limit, offset);
 
     void fetcher(pagedUrl).then(
       (pageData) => {
@@ -83,8 +85,8 @@ export function useInfiniteFetch<T>(
         }));
         internalRef.current = {
           isLoading: false,
-          offset: offset + LIMIT,
-          hasMore: pageData.length >= LIMIT,
+          offset: offset + limit,
+          hasMore: pageData.length >= limit,
         };
       },
       (error) => {
@@ -100,7 +102,7 @@ export function useInfiniteFetch<T>(
         };
       },
     );
-  }, [apiPath, fetcher]);
+  }, [apiPath, fetcher, limit]);
 
   const didUseInitialData = useRef(initialData.current !== null);
 
