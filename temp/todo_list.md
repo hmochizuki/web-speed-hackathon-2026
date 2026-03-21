@@ -15,8 +15,8 @@
 - [x] 048-DM詳細ページのMutationObserver/scrollTo削除でTBTを改善する（DM詳細TBT+20-30点、forced reflow連発）
 - [x] 042-利用規約ページのFCP/SI改善する（利用規約+15-20点）→ SSGで実装済み、LCP 0→17.25改善確認
 - [x] 046-写真投稿ページのLCPをpreloadで改善する（写真投稿LCP+10-20点、サーバー側Link preload）
-- [ ] 051-DM送信フローのTBTを改善する（DM送信TBT+20-25点、楽観的更新+key属性追加+typing debounce）
-- [ ] 052-Crok AIチャットフローのTBTを改善する（Crok TBT+20-25点、Markdown key削除+SSEバッチ化+useHasContentBelow最適化+サジェストdebounce）
+- [x] 051-DM送信フローのTBTを改善する（DM送信TBT+20-25点、楽観的更新+key属性追加+typing debounce）
+- [x] 052-Crok AIチャットフローのTBTを改善する（Crok TBT+20-25点、Markdown key削除+SSEバッチ化+useHasContentBelow最適化+サジェストdebounce）
 - [ ] 049-DM詳細ページのLCP/SI改善する（DM詳細+10-15点、初期データプリロード）
 - [ ] 050-ホームページのCLSを改善する（ホームCLS+5-7点、スケルトンプレースホルダー）
 
