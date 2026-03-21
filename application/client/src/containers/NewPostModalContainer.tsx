@@ -13,16 +13,18 @@ interface SubmitParams {
 }
 
 async function sendNewPost({ images, movie, sound, text }: SubmitParams): Promise<Models.Post> {
-  const payload = {
-    images: images
-      ? await Promise.all(images.map((image) => sendFile("/api/v1/images", image)))
-      : [],
-    movie: movie ? await sendFile("/api/v1/movies", movie) : undefined,
-    sound: sound ? await sendFile("/api/v1/sounds", sound) : undefined,
-    text,
-  };
+  const [imageResults, movieResult, soundResult] = await Promise.all([
+    Promise.all(images.map((image) => sendFile("/api/v1/images", image))),
+    movie ? sendFile("/api/v1/movies", movie) : undefined,
+    sound ? sendFile("/api/v1/sounds", sound) : undefined,
+  ]);
 
-  return sendJSON("/api/v1/posts", payload);
+  return sendJSON("/api/v1/posts", {
+    images: imageResults,
+    movie: movieResult,
+    sound: soundResult,
+    text,
+  });
 }
 
 interface Props {
