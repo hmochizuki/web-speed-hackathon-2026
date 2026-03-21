@@ -3,14 +3,23 @@ import httpErrors from "http-errors";
 
 import { Comment, Post, PostsImagesRelation } from "@web-speed-hackathon-2026/server/src/models";
 
+function sortPostImages(post: Post): void {
+  const images = post.get("images") as Array<{ createdAt: Date | string }> | undefined;
+  if (images) {
+    images.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  }
+}
+
 export const postRouter = Router();
 
 postRouter.get("/posts", async (req, res) => {
   const posts = await Post.findAll({
+    subQuery: true,
     limit: req.query["limit"] != null ? Number(req.query["limit"]) : undefined,
     offset: req.query["offset"] != null ? Number(req.query["offset"]) : undefined,
   });
 
+  for (const post of posts) sortPostImages(post);
   return res.status(200).type("application/json").send(posts);
 });
 
@@ -21,6 +30,7 @@ postRouter.get("/posts/:postId", async (req, res) => {
     throw new httpErrors.NotFound();
   }
 
+  sortPostImages(post);
   return res.status(200).type("application/json").send(post);
 });
 
@@ -61,5 +71,6 @@ postRouter.post("/posts", async (req, res) => {
 
   const result = await Post.findByPk(post.id);
 
+  if (result) sortPostImages(result);
   return res.status(200).type("application/json").send(result);
 });

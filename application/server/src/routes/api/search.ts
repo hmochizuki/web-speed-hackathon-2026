@@ -38,13 +38,20 @@ searchRouter.get("/search", async (req, res) => {
 
   const textWhere = searchTerm ? { text: { [Op.like]: searchTerm } } : {};
 
-  const postsByText = await Post.findAll({
+  const textPostIds = await Post.unscoped().findAll({
+    attributes: ["id"],
     limit: dbLimit,
+    order: [["createdAt", "DESC"]],
     where: {
       ...textWhere,
       ...dateWhere,
     },
   });
+  const postsByText = textPostIds.length > 0
+    ? await Post.findAll({
+        where: { id: textPostIds.map((p) => p.id) },
+      })
+    : [];
 
   let postsByUser: typeof postsByText = [];
   if (searchTerm) {
@@ -61,10 +68,12 @@ searchRouter.get("/search", async (req, res) => {
         },
       ],
       limit: dbLimit,
+      order: [["createdAt", "DESC"]],
       where: dateWhere,
     });
     if (userPostIds.length > 0) {
       postsByUser = await Post.findAll({
+        subQuery: true,
         where: { id: userPostIds.map((p) => p.id) },
       });
     }
@@ -85,6 +94,13 @@ searchRouter.get("/search", async (req, res) => {
   const sliceStart = offset ?? 0;
   const sliceEnd = limit != null ? sliceStart + limit : mergedPosts.length;
   const result = mergedPosts.slice(sliceStart, sliceEnd);
+
+  for (const post of result) {
+    const images = post.get("images") as Array<{ createdAt: Date | string }> | undefined;
+    if (images) {
+      images.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }
+  }
 
   return res.status(200).type("application/json").send(result);
 });

@@ -60,12 +60,20 @@ userRouter.get("/users/:username/posts", async (req, res) => {
   }
 
   const posts = await Post.findAll({
+    subQuery: true,
     limit: req.query["limit"] != null ? Number(req.query["limit"]) : undefined,
     offset: req.query["offset"] != null ? Number(req.query["offset"]) : undefined,
     where: {
       userId: user.id,
     },
   });
+
+  for (const post of posts) {
+    const images = post.get("images") as Array<{ createdAt: Date | string }> | undefined;
+    if (images) {
+      images.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }
+  }
 
   return res.status(200).type("application/json").send(posts);
 });
