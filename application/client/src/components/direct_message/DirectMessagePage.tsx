@@ -75,21 +75,10 @@ export const DirectMessagePage = ({
   const messageListRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
-    const scrollToBottom = () => {
+    requestAnimationFrame(() => {
       window.scrollTo(0, document.body.scrollHeight);
-    };
-    scrollToBottom();
-
-    const listEl = messageListRef.current;
-    if (listEl == null) return;
-
-    const observer = new MutationObserver(scrollToBottom);
-    observer.observe(listEl, { childList: true });
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
+    });
+  }, [conversation.messages.length]);
 
   if (conversationError != null) {
     return (
