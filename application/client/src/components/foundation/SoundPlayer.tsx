@@ -1,4 +1,4 @@
-import { ReactEventHandler, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ReactEventHandler, useCallback, useMemo, useRef, useState } from "react";
 
 import { AspectRatioBox } from "@web-speed-hackathon-2026/client/src/components/foundation/AspectRatioBox";
 import { FontAwesomeIcon } from "@web-speed-hackathon-2026/client/src/components/foundation/FontAwesomeIcon";
@@ -12,26 +12,7 @@ interface Props {
 }
 
 export const SoundPlayer = ({ sound }: Props) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "200px" },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  const { data, isLoading } = useFetch(isVisible ? getSoundPath(sound.id) : "", fetchBinary);
+  const { data } = useFetch(getSoundPath(sound.id), fetchBinary);
 
   const blobUrl = useMemo(() => {
     return data !== null ? URL.createObjectURL(new Blob([data])) : null;
@@ -56,16 +37,11 @@ export const SoundPlayer = ({ sound }: Props) => {
     });
   }, []);
 
-  if (!isVisible || isLoading || data === null || blobUrl === null) {
-    return <div ref={containerRef} className="bg-cax-surface-subtle h-full w-full" />;
-  }
-
   return (
-    <div
-      ref={containerRef}
-      className="bg-cax-surface-subtle flex h-full w-full items-center justify-center"
-    >
-      <audio ref={audioRef} loop={true} onTimeUpdate={handleTimeUpdate} src={blobUrl} />
+    <div className="bg-cax-surface-subtle flex h-full w-full items-center justify-center">
+      {blobUrl !== null ? (
+        <audio ref={audioRef} loop={true} onTimeUpdate={handleTimeUpdate} src={blobUrl} />
+      ) : null}
       <div className="p-2">
         <button
           className="bg-cax-accent text-cax-surface-raised flex h-8 w-8 items-center justify-center rounded-full text-sm hover:opacity-75"
@@ -86,7 +62,7 @@ export const SoundPlayer = ({ sound }: Props) => {
           <AspectRatioBox aspectHeight={1} aspectWidth={10}>
             <div className="relative h-full w-full">
               <div className="absolute inset-0 h-full w-full">
-                <SoundWaveSVG soundData={data} />
+                {data !== null ? <SoundWaveSVG soundData={data} /> : null}
               </div>
               <div
                 className="bg-cax-surface-subtle absolute inset-0 h-full w-full opacity-75"

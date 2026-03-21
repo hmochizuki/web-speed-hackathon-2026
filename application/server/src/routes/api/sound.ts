@@ -47,19 +47,6 @@ function parseFfmetadata(raw: Buffer): SoundMetadata {
   };
 }
 
-async function extractMetadataViaFfmpeg(inputPath: string, tmpDir: string): Promise<SoundMetadata> {
-  const metaPath = path.join(tmpDir, "meta.txt");
-  try {
-    await execFileAsync("ffmpeg", ["-y", "-i", inputPath, "-f", "ffmetadata", metaPath], {
-      maxBuffer: 10 * 1024 * 1024,
-    });
-    const raw = await fs.readFile(metaPath);
-    return parseFfmetadata(raw);
-  } catch {
-    return { artist: UNKNOWN_ARTIST, title: UNKNOWN_TITLE };
-  }
-}
-
 export const soundRouter = Router();
 
 soundRouter.post("/sounds", async (req, res) => {
@@ -74,11 +61,10 @@ soundRouter.post("/sounds", async (req, res) => {
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "sound-"));
   const inputPath = path.join(tmpDir, "input");
   const outputPath = path.join(tmpDir, `output.${EXTENSION}`);
+  const metaPath = path.join(tmpDir, "meta.txt");
 
   try {
     await fs.writeFile(inputPath, req.body);
-
-    const { artist, title } = await extractMetadataViaFfmpeg(inputPath, tmpDir);
 
     await execFileAsync(
       "ffmpeg",
@@ -86,23 +72,31 @@ soundRouter.post("/sounds", async (req, res) => {
         "-y",
         "-i",
         inputPath,
+        "-f",
+        "ffmetadata",
+        metaPath,
         "-vn",
-        "-map_metadata",
-        "-1",
-        "-metadata",
-        `artist=${artist}`,
-        "-metadata",
-        `title=${title}`,
+        "-b:a",
+        "64k",
         outputPath,
       ],
       { maxBuffer: 10 * 1024 * 1024 },
     );
 
-    const outputData = await fs.readFile(outputPath);
+    let artist = UNKNOWN_ARTIST;
+    let title = UNKNOWN_TITLE;
+    try {
+      const raw = await fs.readFile(metaPath);
+      const meta = parseFfmetadata(raw);
+      artist = meta.artist;
+      title = meta.title;
+    } catch {
+      // ignore
+    }
 
     await fs.mkdir(path.resolve(UPLOAD_PATH, "sounds"), { recursive: true });
     const filePath = path.resolve(UPLOAD_PATH, `./sounds/${soundId}.${EXTENSION}`);
-    await fs.writeFile(filePath, outputData);
+    await fs.rename(outputPath, filePath);
 
     return res.status(200).type("application/json").send({ artist, id: soundId, title });
   } catch (err) {
