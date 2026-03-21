@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useCallback, useState } from "react";
+import { FormEvent, useCallback, useRef, useState } from "react";
 
 import { AuthFormData } from "@web-speed-hackathon-2026/client/src/auth/types";
 import { validate } from "@web-speed-hackathon-2026/client/src/auth/validation";
@@ -13,33 +13,30 @@ interface Props {
 }
 
 export const AuthModalPage = ({ onRequestCloseModal, onSubmit }: Props) => {
-  const [values, setValues] = useState<AuthFormData>({
-    type: "signin",
-    username: "",
-    name: "",
-    password: "",
-  });
-  const [touched, setTouched] = useState<Partial<Record<keyof AuthFormData, boolean>>>({});
+  const formRef = useRef<HTMLFormElement>(null);
+  const [type, setType] = useState<"signin" | "signup">("signin");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | undefined>();
-
-  const errors = validate(values);
-  const hasErrors = Object.keys(errors).length > 0;
-
-  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setValues((prev) => ({ ...prev, [name]: value }));
-  }, []);
-
-  const handleBlur = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setTouched((prev) => ({ ...prev, [e.target.name]: true }));
-  }, []);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof AuthFormData, string>>>({});
 
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
-      setTouched({ username: true, name: true, password: true });
-      if (hasErrors) return;
+      const form = formRef.current;
+      if (!form) return;
+
+      const formData = new FormData(form);
+      const values: AuthFormData = {
+        type,
+        username: (formData.get("username") as string) || "",
+        name: (formData.get("name") as string) || "",
+        password: (formData.get("password") as string) || "",
+      };
+
+      const errors = validate(values);
+      setFieldErrors(errors);
+      if (Object.keys(errors).length > 0) return;
+
       setSubmitting(true);
       setSubmitError(undefined);
       try {
@@ -52,27 +49,24 @@ export const AuthModalPage = ({ onRequestCloseModal, onSubmit }: Props) => {
         setSubmitting(false);
       }
     },
-    [values, hasErrors, onSubmit],
+    [type, onSubmit],
   );
 
   const toggleType = useCallback(() => {
-    setValues((prev) => ({
-      ...prev,
-      type: prev.type === "signin" ? "signup" : "signin",
-    }));
-    setTouched({});
+    setType((prev) => (prev === "signin" ? "signup" : "signin"));
+    setFieldErrors({});
     setSubmitError(undefined);
   }, []);
 
   return (
-    <form className="grid gap-y-6" onSubmit={handleSubmit}>
+    <form className="grid gap-y-6" onSubmit={handleSubmit} ref={formRef}>
       <h2 className="text-center text-2xl font-bold">
-        {values.type === "signin" ? "サインイン" : "新規登録"}
+        {type === "signin" ? "サインイン" : "新規登録"}
       </h2>
 
       <div className="flex justify-center">
         <button className="text-cax-brand underline" onClick={toggleType} type="button">
-          {values.type === "signin" ? "初めての方はこちら" : "サインインはこちら"}
+          {type === "signin" ? "初めての方はこちら" : "サインインはこちら"}
         </button>
       </div>
 
@@ -80,23 +74,17 @@ export const AuthModalPage = ({ onRequestCloseModal, onSubmit }: Props) => {
         <FormInputField
           label="ユーザー名"
           name="username"
-          value={values.username}
-          onChange={handleChange}
-          onBlur={handleBlur}
           leftItem={<span className="text-cax-text-subtle leading-none">@</span>}
           autoComplete="username"
-          error={touched.username ? errors.username : undefined}
+          error={fieldErrors.username}
         />
 
-        {values.type === "signup" && (
+        {type === "signup" && (
           <FormInputField
             label="名前"
             name="name"
-            value={values.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
             autoComplete="nickname"
-            error={touched.name ? errors.name : undefined}
+            error={fieldErrors.name}
           />
         )}
 
@@ -104,15 +92,12 @@ export const AuthModalPage = ({ onRequestCloseModal, onSubmit }: Props) => {
           label="パスワード"
           name="password"
           type="password"
-          value={values.password}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          autoComplete={values.type === "signup" ? "new-password" : "current-password"}
-          error={touched.password ? errors.password : undefined}
+          autoComplete={type === "signup" ? "new-password" : "current-password"}
+          error={fieldErrors.password}
         />
       </div>
 
-      {values.type === "signup" ? (
+      {type === "signup" ? (
         <p>
           <Link className="text-cax-brand underline" onClick={onRequestCloseModal} to="/terms">
             利用規約
@@ -121,8 +106,8 @@ export const AuthModalPage = ({ onRequestCloseModal, onSubmit }: Props) => {
         </p>
       ) : null}
 
-      <ModalSubmitButton disabled={submitting || hasErrors} loading={submitting}>
-        {values.type === "signin" ? "サインイン" : "登録する"}
+      <ModalSubmitButton disabled={submitting} loading={submitting}>
+        {type === "signin" ? "サインイン" : "登録する"}
       </ModalSubmitButton>
 
       <ModalErrorMessage>{submitError}</ModalErrorMessage>
