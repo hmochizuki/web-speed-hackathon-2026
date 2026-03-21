@@ -23,6 +23,9 @@ interface Props {
   isSubmitting: boolean;
   onTyping: () => void;
   onSubmit: (params: DirectMessageFormData) => Promise<void>;
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  onLoadMore: () => Promise<void>;
 }
 
 export const DirectMessagePage = ({
@@ -33,6 +36,9 @@ export const DirectMessagePage = ({
   isSubmitting,
   onTyping,
   onSubmit,
+  hasMore,
+  isLoadingMore,
+  onLoadMore,
 }: Props) => {
   const formRef = useRef<HTMLFormElement>(null);
   const textAreaId = useId();
@@ -74,10 +80,31 @@ export const DirectMessagePage = ({
 
   const messageListRef = useRef<HTMLUListElement>(null);
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isInitialLoadRef = useRef(true);
 
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView();
+    if (isInitialLoadRef.current) {
+      messageEndRef.current?.scrollIntoView();
+      isInitialLoadRef.current = false;
+    } else {
+      messageEndRef.current?.scrollIntoView();
+    }
   }, [conversation.messages.length]);
+
+  const handleLoadMore = useCallback(() => {
+    if (scrollContainerRef.current == null) return;
+    const container = scrollContainerRef.current;
+    const prevScrollHeight = container.scrollHeight;
+    void onLoadMore().then(() => {
+      requestAnimationFrame(() => {
+        if (scrollContainerRef.current != null) {
+          const newScrollHeight = scrollContainerRef.current.scrollHeight;
+          scrollContainerRef.current.scrollTop += newScrollHeight - prevScrollHeight;
+        }
+      });
+    });
+  }, [onLoadMore]);
 
   if (conversationError != null) {
     return (
@@ -107,8 +134,24 @@ export const DirectMessagePage = ({
         </div>
       </header>
 
-      <div className="bg-cax-surface-subtle flex-1 space-y-4 overflow-y-auto px-4 pt-4 pb-8">
-        {conversation.messages.length === 0 && (
+      <div
+        className="bg-cax-surface-subtle flex-1 space-y-4 overflow-y-auto px-4 pt-4 pb-8"
+        ref={scrollContainerRef}
+      >
+        {hasMore && (
+          <div className="flex justify-center py-2">
+            <button
+              className="text-cax-brand text-sm hover:underline disabled:opacity-50"
+              disabled={isLoadingMore}
+              onClick={handleLoadMore}
+              type="button"
+            >
+              {isLoadingMore ? "読み込み中..." : "過去のメッセージを読み込む"}
+            </button>
+          </div>
+        )}
+
+        {conversation.messages.length === 0 && !hasMore && (
           <p className="text-cax-text-muted text-center text-sm">
             まだメッセージはありません。最初のメッセージを送信してみましょう。
           </p>

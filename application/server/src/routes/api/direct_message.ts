@@ -151,25 +151,48 @@ directMessageRouter.get("/dm/:conversationId", async (req, res) => {
     throw new httpErrors.Unauthorized();
   }
 
+  const MESSAGE_LIMIT = 30;
+
   const conversation = await DirectMessageConversation.findOne({
     where: {
       id: req.params.conversationId,
       [Op.or]: [{ initiatorId: req.session.userId }, { memberId: req.session.userId }],
     },
-    include: [
-      {
-        association: "messages",
-        include: [{ association: "sender", include: [{ association: "profileImage" }] }],
-        order: [["createdAt", "ASC"]],
-        required: false,
-      },
-    ],
   });
   if (conversation === null) {
     throw new httpErrors.NotFound();
   }
 
-  return res.status(200).type("application/json").send(conversation);
+  const before = typeof req.query["before"] === "string" ? req.query["before"] : undefined;
+
+  const whereClause: Record<string, unknown> = { conversationId: conversation.id };
+  if (before != null) {
+    const cursorMessage = await DirectMessage.findByPk(before, { attributes: ["createdAt"] });
+    if (cursorMessage != null) {
+      whereClause["createdAt"] = { [Op.lt]: cursorMessage.createdAt };
+    }
+  }
+
+  const messages = await DirectMessage.findAll({
+    where: whereClause,
+    include: [{ association: "sender", include: [{ association: "profileImage" }] }],
+    order: [["createdAt", "DESC"]],
+    limit: MESSAGE_LIMIT + 1,
+  });
+
+  const hasMore = messages.length > MESSAGE_LIMIT;
+  const sliced = hasMore ? messages.slice(0, MESSAGE_LIMIT) : messages;
+  sliced.reverse();
+
+  const json = conversation.toJSON();
+  return res
+    .status(200)
+    .type("application/json")
+    .send({
+      ...json,
+      messages: sliced.map((m) => m.toJSON()),
+      hasMore,
+    });
 });
 
 directMessageRouter.ws("/dm/:conversationId", async (req, _res) => {

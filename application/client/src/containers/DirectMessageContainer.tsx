@@ -31,6 +31,8 @@ export const DirectMessageContainer = ({ activeUser, authModalId }: Props) => {
   const [conversation, setConversation] = useState<Models.DirectMessageConversation | null>(null);
   const [conversationError, setConversationError] = useState<Error | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const [isPeerTyping, setIsPeerTyping] = useState(false);
   const peerTypingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -45,10 +47,11 @@ export const DirectMessageContainer = ({ activeUser, authModalId }: Props) => {
         `/api/v1/dm/${conversationId}`,
       );
       setConversation(data);
+      setHasMore(data.hasMore === true);
       setConversationError(null);
     } catch (error) {
       setConversation(null);
-      setConversationError(error as Error);
+      setConversationError(error instanceof Error ? error : new Error(String(error)));
     }
   }, [activeUser, conversationId]);
 
@@ -62,6 +65,26 @@ export const DirectMessageContainer = ({ activeUser, authModalId }: Props) => {
       void sendRead();
     });
   }, [loadConversation, sendRead]);
+
+  const loadMore = useCallback(async () => {
+    if (conversation == null || conversation.messages.length === 0 || !hasMore) {
+      return;
+    }
+    setIsLoadingMore(true);
+    try {
+      const oldestId = conversation.messages[0]?.id;
+      const data = await fetchJSON<Models.DirectMessageConversation>(
+        `/api/v1/dm/${conversationId}?before=${oldestId}`,
+      );
+      setHasMore(data.hasMore === true);
+      setConversation((prev) => {
+        if (prev == null) return prev;
+        return { ...prev, messages: [...data.messages, ...prev.messages] };
+      });
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [conversation, conversationId, hasMore]);
 
   const handleSubmit = useCallback(
     async (params: DirectMessageFormData) => {
@@ -91,7 +114,9 @@ export const DirectMessageContainer = ({ activeUser, authModalId }: Props) => {
     }, 2000);
   }, [conversationId]);
 
-  useWs(`/api/v1/dm/${conversationId}`, (event: DmUpdateEvent | DmTypingEvent) => {
+  const wsUrl = conversation != null ? `/api/v1/dm/${conversationId}` : null;
+
+  useWs(wsUrl, (event: DmUpdateEvent | DmTypingEvent) => {
     if (event.type === "dm:conversation:message") {
       setConversation((prev) => {
         if (prev == null) return prev;
@@ -156,10 +181,10 @@ export const DirectMessageContainer = ({ activeUser, authModalId }: Props) => {
     return (
       <section className="bg-cax-surface flex min-h-[calc(100vh-(--spacing(12)))] flex-col lg:min-h-screen">
         <header className="border-cax-border bg-cax-surface sticky top-0 z-10 flex items-center gap-2 border-b px-4 py-3">
-          <div className="h-12 w-12 rounded-full bg-cax-surface-subtle" />
+          <div className="bg-cax-surface-subtle h-12 w-12 rounded-full" />
           <div className="min-w-0 space-y-1">
-            <div className="h-5 w-24 rounded bg-cax-surface-subtle" />
-            <div className="h-3 w-16 rounded bg-cax-surface-subtle" />
+            <div className="bg-cax-surface-subtle h-5 w-24 rounded" />
+            <div className="bg-cax-surface-subtle h-3 w-16 rounded" />
           </div>
         </header>
         <div className="bg-cax-surface-subtle flex-1" />
@@ -176,6 +201,9 @@ export const DirectMessageContainer = ({ activeUser, authModalId }: Props) => {
       isPeerTyping={isPeerTyping}
       isSubmitting={isSubmitting}
       onSubmit={handleSubmit}
+      hasMore={hasMore}
+      isLoadingMore={isLoadingMore}
+      onLoadMore={loadMore}
     />
   );
 };

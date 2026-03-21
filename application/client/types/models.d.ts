@@ -63,6 +63,7 @@ declare namespace Models {
     member: Models.User;
     messages: Array<Models.DirectMessage>;
     hasUnread?: boolean;
+    hasMore?: boolean;
   }
 
   interface DirectMessageConversationSummary {
