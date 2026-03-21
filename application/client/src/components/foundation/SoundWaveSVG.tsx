@@ -12,7 +12,8 @@ function yieldToMain(): Promise<void> {
 }
 
 async function calculate(data: ArrayBuffer): Promise<ParsedData> {
-  const audioCtx = new AudioContext();
+  const { AudioContext: SAC } = await import("standardized-audio-context");
+  const audioCtx = new SAC();
 
   const buffer = await audioCtx.decodeAudioData(data.slice(0));
   const leftData = buffer.getChannelData(0);
