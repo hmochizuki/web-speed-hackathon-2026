@@ -154,7 +154,8 @@ function main(): void {
   const pages = buildSsgPages();
 
   for (const page of pages) {
-    const appHtml = renderPage(page.urlPath, page.initialData);
+    let appHtml = renderPage(page.urlPath, page.initialData);
+    appHtml = appHtml.replace(/<link rel="preload"[^>]*\/>/g, "");
 
     let html = indexHtml.replace('<div id="app"></div>', `<div id="app">${appHtml}</div>`);
 
