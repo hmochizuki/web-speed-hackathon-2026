@@ -12,7 +12,7 @@
 
 ## 優先度: 高（各+10〜30点）
 
-- [ ] 048-DM詳細ページのMutationObserver/scrollTo削除でTBTを改善する（DM詳細TBT+20-30点、forced reflow連発）
+- [x] 048-DM詳細ページのMutationObserver/scrollTo削除でTBTを改善する（DM詳細TBT+20-30点、forced reflow連発）
 - [x] 042-利用規約ページのFCP/SI改善する（利用規約+15-20点）→ SSGで実装済み、LCP 0→17.25改善確認
 - [ ] 046-写真投稿ページのLCPをpreloadで改善する（写真投稿LCP+10-20点、サーバー側Link preload）
 - [ ] 049-DM詳細ページのLCP/SI改善する（DM詳細+10-15点、初期データプリロード）
