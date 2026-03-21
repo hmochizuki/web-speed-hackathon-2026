@@ -5,6 +5,7 @@ import history from "connect-history-api-fallback";
 import { Router } from "express";
 import serveStatic from "serve-static";
 
+import { Post } from "@web-speed-hackathon-2026/server/src/models";
 import {
   CLIENT_DIST_PATH,
   PUBLIC_PATH,
@@ -32,6 +33,35 @@ for (const [routePath, html] of Object.entries(ssgPages)) {
     });
   }
 }
+
+staticRouter.get("/posts/:postId", async (req, res, next) => {
+  try {
+    const post = await Post.findByPk(req.params.postId, {
+      attributes: [],
+      include: [
+        { association: "images", through: { attributes: [] }, attributes: ["id"] },
+        { association: "user", attributes: ["profileImageId"], include: [{ association: "profileImage", attributes: ["id"] }] },
+      ],
+    });
+    if (post !== null) {
+      const linkValues: string[] = [];
+      const images = post.get("images") as Array<{ id: string }> | undefined;
+      if (images && images.length > 0) {
+        linkValues.push(`</images/${images[0]!.id}.avif>; rel=preload; as=image`);
+      }
+      const user = post.get("user") as { profileImage?: { id: string } } | undefined;
+      if (user?.profileImage) {
+        linkValues.push(`</images/profiles/${user.profileImage.id}.avif>; rel=preload; as=image`);
+      }
+      if (linkValues.length > 0) {
+        res.setHeader("Link", linkValues.join(", "));
+      }
+    }
+  } catch {
+    // preloadヘッダー付与に失敗してもページ表示は継続
+  }
+  next();
+});
 
 // SPA 対応のため、ファイルが存在しないときに index.html を返す
 staticRouter.use(history());
