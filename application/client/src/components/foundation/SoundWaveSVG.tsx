@@ -5,44 +5,6 @@ interface ParsedData {
   peaks: number[];
 }
 
-function yieldToMain(): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, 0);
-  });
-}
-
-async function calculate(data: ArrayBuffer): Promise<ParsedData> {
-  const audioCtx = new AudioContext();
-
-  const buffer = await audioCtx.decodeAudioData(data.slice(0));
-  const leftData = buffer.getChannelData(0);
-  const rightData = buffer.getChannelData(1);
-
-  const length = leftData.length;
-  const chunkSize = Math.ceil(length / 100);
-  const peaks: number[] = [];
-
-  for (let i = 0; i < length; i += chunkSize) {
-    let sum = 0;
-    const end = Math.min(i + chunkSize, length);
-    for (let j = i; j < end; j++) {
-      sum += (Math.abs(leftData[j]!) + Math.abs(rightData[j]!)) / 2;
-    }
-    peaks.push(sum / (end - i));
-
-    if (peaks.length % 20 === 0) {
-      await yieldToMain();
-    }
-  }
-
-  let max = 0;
-  for (const p of peaks) {
-    if (p > max) max = p;
-  }
-
-  return { max, peaks };
-}
-
 interface Props {
   soundData: ArrayBuffer;
 }
@@ -55,9 +17,16 @@ export const SoundWaveSVG = ({ soundData }: Props) => {
   });
 
   useEffect(() => {
-    calculate(soundData).then(({ max, peaks }) => {
-      setPeaks({ max, peaks });
-    });
+    const worker = new Worker(new URL("../../workers/sound_wave_worker.ts", import.meta.url));
+    worker.onmessage = (e: MessageEvent<ParsedData>) => {
+      setPeaks(e.data);
+      worker.terminate();
+    };
+    worker.postMessage(soundData.slice(0), [soundData.slice(0)]);
+
+    return () => {
+      worker.terminate();
+    };
   }, [soundData]);
 
   return (
