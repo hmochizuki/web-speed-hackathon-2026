@@ -39,7 +39,26 @@
       "Bash(wc *)",
       "Bash(ls *)",
       "Bash(mkdir *)",
-      "Skill(run-scoring)"
+      "Bash(rm */application/public/images/*.jpg)",
+      "Bash(rm */application/public/images/profiles/*.jpg)",
+      "Bash(sort *)",
+      "Bash(tee *)",
+      "Bash(find */application/dist *)",
+      "Bash(woff2_compress *)",
+      "Bash(npx playwright *)",
+      "Bash(npm *)",
+      "Bash(bash -c *)",
+      "Skill(run-scoring)",
+      "mcp__playwright__browser_evaluate",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__list_pages",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__new_page",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__performance_start_trace",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__performance_analyze_insight",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_snapshot",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__evaluate_script",
+      "Read(/tmp/*)"
     ]
   },
   "hooks": {
